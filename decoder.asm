@@ -2,7 +2,7 @@
 # Authors: Juan C. Morales & Jose D. Tello
 
 .data
-file_in:	.asciiz "encoded_file.txt"
+file_in:	.asciiz "encoded.bin"
 file_out:	.asciiz "decoded_file.txt"
 input_buffer: 	.space 1024
 
