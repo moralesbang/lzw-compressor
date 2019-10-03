@@ -1,0 +1,12 @@
+.include	"lenght.asm"
+.data
+diccionario: 	.byte 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x70, 0x00 #0x00 condicion de parada#
+
+.text
+	la 	$s0, diccionario
+	addi 	$t0, $s0,0
+	tamano($t0)
+	addi 	$s7, $v0, 0
+	j exit
+	
+exit:
