@@ -6,15 +6,8 @@ aux:	.byte	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 
 .text
 main:
-	la	$a0, diccionario
-	addi	$s1, $a0, 0 
-	addi	$s0, $zero, 97
-	sb	$s0, 0($a0)
-	addi	$s0, $zero, 98
-	sb	$s0, 16($a0)
-	addi	$s0, $zero, 99
-	sb	$s0, 32($a0)
-	addi	$s7, $a0, 0 
+	jal	dictInitialize
+	la	$a0, diccionario 
 	la	$a1, archivo
 	jal compression
 	lb	$t8, 64($s1)
@@ -86,15 +79,7 @@ compression:
 			addi	$t4, $v1, 0		# el index en i
 			j whileCPrimeDontHaveMinus
 		exitWhileCPrime:
-		####------------
-		
-		
-		#################################################
-		lb $t8, 0($s3)
-		lb $t9, 1($s3)
-		lb $k0, 2($s3)
-		################################################3
-		
+				
 		
 		#Imprimo indice-----------------------
 		addi	$a0, $s1, 0		#parametro para lenght de diccionario
@@ -140,6 +125,41 @@ compression:
 	jr $ra
 
 
+
+
+ #-------------------------------------- Dict initialize----------------------------------------------
+dictInitialize:
+	addi	$sp, $sp, -20
+	sw	$s0, 0($sp)
+	sw	$t0, 4($sp)
+	sw	$t1, 8($sp)
+	sw	$t2, 12($sp)
+	sw	$t3, 16($sp)
+	sw	$ra, 20($sp)
+
+	la 	$s0, diccionario
+	addi	$t0, $s0, 0		# i con el que recorro Diccionario
+	addi 	$t1, $zero, 255		#punto de parada de ascci
+	addi 	$t2, $zero, 1		# j =0
+	loop_dict:
+  		slt 	$t3, $t2, $t1
+  		beqz 	$t3, continue
+  		sb 	$t2, ($t0)		#guardo el asscii en la posiccion direccion.dir por j
+  		addi 	$t2, $t2, 1
+  		addi	$t0, $t0, 16
+  		j loop_dict
+ 	continue:
+ 	
+ 	lw	$ra, 20($sp)
+ 	lw 	$t3, 16($sp)
+ 	lw	$t2, 12($sp)
+ 	lw	$t1, 8($sp)
+ 	lw	$t0, 4($sp)
+ 	lw	$s0, 0($sp)
+ 	
+ 	addi	$sp, $sp, 20
+ 	jr 	$ra
+ #-------------------------------------- End Dict initialize ----------------------------------------------
 #----------------------------------- StoreInDic:(Diccionario.dir, Aux.dir) ------------------------------------
 storeInDic:
 	addi	$sp, $sp, -40			#reserva 1 espacio
