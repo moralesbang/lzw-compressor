@@ -51,20 +51,6 @@ dict_setup:
 # -- - --
 
 
-# -- OPENING FILE --
-open_files:
-	open_encoded_file:
-		# Open (for reading) a file
-		li $v0, 13			# System call for open file
-		la $a0, file_in		# Input file name
-		li $a1, 0			# Open for reading (flag = 0)
-		li $a2, 0			# Mode is ignored
-		syscall				# Open a file (file descriptor returned in $v0)
-		move $s0, $v0		# Copy file descriptor
-
-# -- - --
-
-
 # -- OUTPUT --
 # Inputs:
 # $a0 -> Direction of output_data
