@@ -1,4 +1,4 @@
-cadena= 'abcabca'
+cadena= 'bbacbabc'
 
 def create_dictionary(characters):
     dictionary = []

@@ -1,20 +1,38 @@
 .data	
 diccionario:	.space 65536
-archivo:	.asciiz  "abcabca"
+archivo:	.asciiz "example"
 c:	.byte	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 aux:	.byte	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 
+.align 2
+input_buffer:	.space 20000
+
 .text
 main:
-	jal	dictInitialize
-	la	$a0, diccionario 
-	la	$a1, archivo
+	jal	dictInitialize	# inicializo el diccionario con el ascci de 1 a 255, se excluye el null por condicion de parada	
+	li $v0, 13		# System call for open file
+	la $a0, archivo		# Input file name
+	li $a1, 0		# Open for reading (flag = 0)
+	li $a2, 0		# Mode is ignored
+	syscall			# Open a file (file descriptor returned in $v0)
+	move $s0, $v0		# Copy file descriptor
+	
+	# Read from previously opened file
+	li $v0, 14		# System call for reading from file
+	move $a0, $s0		# File descriptor
+	
+	la $a1, input_buffer	# Address of input buffer
+	li $a2, 20000		# Maximum number of characters to read
+	syscall			# Read from file
+	move $t1, $v0		# Copy number of characters read
+	
+	# Close the files
+  	li   $v0, 16       # system call for close file
+	move $a0, $s0      # file descriptor to close
+	syscall    
+	la 	$a1, input_buffer	
+	la	$a0, diccionario 	#Cargo el diccionario
 	jal compression
-	lb	$t8, 64($s1)
-	lb	$t9, 65($s1)
-	#li $v0, 1 		# código de imprimir cadena
-	#addi $a0, $t9,0		# dirección de la cadena
-	#syscall
 	j exit
 #---------------------Metodo de Compresi�n (dicc.dir, file.dir)-----------------------------------------------
 compression: 
@@ -40,7 +58,7 @@ compression:
 	sb	$t1, ($s0)			#Almacenamos en la primera psocicion de C file[0]
 	addi	$t0, $t0, 1			# i = i+1
 	whileCNull:
-		beq	$t1, $zero, ExitWhileCNull  ##------------------------------- $zero es la representaci�n de null?-------
+		beq	$t1, $zero, ExitWhileCNull  ##------------------------------- $zero es la representaci�n de null?-------		
 		add	$t2, $s2, $t0		#i = i+ file.direccion
 		lb	$t3, 0($t2)		# X = file[i]
 		
@@ -58,6 +76,7 @@ compression:
 		addi	$t4, $v1, 0		# el index 
 		whileCPrimeDontHaveMinus:
 			beq	$t4, -1, exitWhileCPrime 
+			beq	$t3, $zero, exitWhileCPrime
 			sll 	$t5, $t4, 4		#Posicion index * 16
 			add	$a0, $s1, $t5		#Asigno parametro diccionario para stroreInC method
 			addi	$a1, $s0, 0		#Asigno parametro vector C para stroreInC method
@@ -90,10 +109,10 @@ compression:
 		jal 	getIndex
 		addi	$t4, $v1, 0		# el index en i
 		
+		###-------------------
 		li	$v0, 1
 		addi 	$a0, $t4,0		# dirección de la cadena
 		syscall
-		
 		
 		#----------------------------------------
 		addi	$a0, $s1, 0		#Parametro de diccionario para metodo StoreInDic
@@ -105,6 +124,8 @@ compression:
 		sb 	$t3, 0($s0)		#C = X
 		addi 	$t0, $t0, 1		#i = i+1
 		lb	$t1, 0($s0)	
+		
+		
 		j whileCNull	
 	ExitWhileCNull:
 	
@@ -129,7 +150,7 @@ compression:
 
  #-------------------------------------- Dict initialize----------------------------------------------
 dictInitialize:
-	addi	$sp, $sp, -20
+	addi	$sp, $sp, -24
 	sw	$s0, 0($sp)
 	sw	$t0, 4($sp)
 	sw	$t1, 8($sp)
@@ -157,7 +178,7 @@ dictInitialize:
  	lw	$t0, 4($sp)
  	lw	$s0, 0($sp)
  	
- 	addi	$sp, $sp, 20
+ 	addi	$sp, $sp, 24
  	jr 	$ra
  #-------------------------------------- End Dict initialize ----------------------------------------------
 #----------------------------------- StoreInDic:(Diccionario.dir, Aux.dir) ------------------------------------
