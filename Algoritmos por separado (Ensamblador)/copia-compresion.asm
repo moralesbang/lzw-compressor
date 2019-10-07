@@ -3,6 +3,7 @@ diccionario:	.space 65536
 archivo:	.asciiz "example"
 c:	.byte	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 aux:	.byte	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+separator:	.asciiz " " #es el espacio para separar los indices
 
 .align 2
 input_buffer:	.space 20000
@@ -111,9 +112,13 @@ compression:
 		
 		###-------------------
 		li	$v0, 1
-		addi 	$a0, $t4,0		# dirección de la cadena
+		addi 	$a0, $t4,0		# posici�n
 		syscall
 		
+		
+		li	$v0, 4
+		la $a0, separator		# dirección de la cadena
+		syscall
 		#----------------------------------------
 		addi	$a0, $s1, 0		#Parametro de diccionario para metodo StoreInDic
 		addi	$a1, $s3, 0		#Parametro de aux para metodo StoreInDic
